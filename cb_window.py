@@ -58,7 +58,7 @@ def findTheBottomMostWindow(arrayWindows):
 
 #.  xbbox/frameW	ybbox/frameH   bboxwidth/frameW. bbHeight/frameH
 #10 0.403636363636 0.229508196721 0.0436363636364 0.0765027322404
-with open('adobe.txt') as f:
+with open('2Buildings.txt') as f:
 
 	#car: 1,
     #truck: 2,
@@ -114,9 +114,35 @@ with open('adobe.txt') as f:
 		else:
 			print("else")
 
+#here we check if there is a building in the picture
+areaBuildings = list()
+index = 0
+if len(arrayBuildings) != 0:
+
+	#The biggest building is what we are interested in
+	#so we find it
+	for build in arrayBuildings:
+		buildingLocation = build.split()
+		newArrayBuild = convertArrayStrToInt(buildingLocation)
+
+		buildTopLeftCoordinate = newArrayBuild[1]			
+		buildTopRightCoordinate = buildTopLeftCoordinate + newArrayBuild[3]			
+		buildBottomLeftCoordinate = buildTopLeftCoordinate + newArrayBuild[4]
+		buildBottomRightCoordinate = buildBottomLeftCoordinate + newArrayBuild[3]
+
+		area = newArrayBuild[3] * newArrayBuild[4]
+
+		temp = [area, index, build]
+		areaBuildings.append(temp)
+		index = index+1
+else:
+	print("No building in the picture") 
+
+areaBuildings = sorted(areaBuildings, key=lambda x:x[0], reverse=True)
+
 #1 we collect all windows that are within the building
 windInBuild = list()
-buildingTopic = arrayBuildings[0]#only one building is in the picture
+buildingTopic = areaBuildings[0][2]#only one building is in the picture
 buildingTopic = buildingTopic.split()
 
 buildingTopic = convertArrayStrToInt(buildingTopic)
@@ -128,8 +154,6 @@ buildBottomRight = buildBottomLeft + buildTopRight
 
 
 #print(buildTopLeft, buildTopRight, buildBottomLeft, buildBottomRight)
-
-print("\n")
 #0-object 1-x 2-y 3-width 4-height
 windowsInsideBuilding = list()
 for wind in arrayWindows:
@@ -142,14 +166,11 @@ for wind in arrayWindows:
 	windowBottomLeft = newArrayWindows[4] + newArrayWindows[1]
 	windowBottomRight = windowBottomLeft + newArrayWindows[3]
 
-	print(buildTopLeft, windowTopLeft, buildBottomLeft, windowBottomLeft)
-	print(buildTopRight, windowTopRight, buildBottomRight, windowBottomRight)
-	print("\n")
 	if (buildTopLeft <= windowTopLeft) and (buildBottomLeft >= windowBottomLeft):
 		if (buildTopRight >= windowTopRight) and (buildBottomRight >= windowBottomRight):
 			windowsInsideBuilding.append(wind)
 
-print("Windows inside the building")
+print("\nWindows inside the building")
 print(len(windowsInsideBuilding))
 for values in windowsInsideBuilding:
 	print(values)
@@ -186,7 +207,7 @@ if filterDoor != None:
 
 	doorLeftBound = doorLeftBound - 50
 	doorRightBound = doorRightBound + 50
-	print("doorLeftBound" + str(doorLeftBound) + " doorRightBound" + str(doorRightBound))
+	#print("doorLeftBound" + str(doorLeftBound) + " doorRightBound" + str(doorRightBound))
 	for wind in windowsInsideBuilding:
 		windowLocation = wind.split()
 		newArrayWindows = convertArrayStrToInt(windowLocation)
@@ -222,7 +243,7 @@ else:
 
 print("\n")
 print(len(windowsSameXCoordinate))
-print("\nWindows within door x coordinate")
+print("Windows within door x coordinate")
 for values in windowsSameXCoordinate:
 	print(values)
 print("\n")
@@ -278,7 +299,6 @@ f.close()
 # San Jose Hilton = 246.06 ft 		floors = 18 above ground
 
 # Adobe Systems = 259 16 floors
-print(len(windowsSameXCoordinate))
 numWindows = len(windowsSameXCoordinate)
 print("Number of floors:", numWindows)
 #buildingType is either office, residential/hotel, or mixed 
