@@ -3,6 +3,7 @@
 # http://www.ctbuh.org/HighRiseInfo/TallestDatabase/Criteria/HeightCalculator/tabid/1007/language/en-GB/Default.aspx
 # This caluculation does not include any factors for spires or any other major projections at the roof plane, due to the wide ranging nature of these.
 from array import array
+
 import sys
 # Factor for increased ground level floor-to-floor height = 3.9m
 # Factor for increased mechanical levels floor-to-floor height = 3.9m x (s/20)
@@ -36,6 +37,8 @@ def convertArrayStrToInt(array):
 		newArray.append(int(i))	
 	return newArray
 
+# function that finds the bottom most window in a building
+# Returns the bottom most window [10 210 432 40 38] in string format
 def findTheBottomMostWindow(arrayWindows):
 	bottomMostWindow = None
 	temp1 = arrayWindows[0]
@@ -86,6 +89,7 @@ with open('2Buildings.txt') as f:
     content = f.readlines()
     content = [x.strip() for x in content]
 
+    #Here, we read file contents, extract them, and store them according to object name
     for line in content:
 		temp = line.split()
 		print(line)
@@ -138,11 +142,12 @@ if len(arrayBuildings) != 0:
 else:
 	print("No building in the picture") 
 
+#sorts the list of buildings according to area
 areaBuildings = sorted(areaBuildings, key=lambda x:x[0], reverse=True)
 
 #1 we collect all windows that are within the building
 windInBuild = list()
-buildingTopic = areaBuildings[0][2]#only one building is in the picture
+buildingTopic = areaBuildings[0][2]
 buildingTopic = buildingTopic.split()
 
 buildingTopic = convertArrayStrToInt(buildingTopic)
@@ -153,7 +158,7 @@ buildBottomLeft = buildingTopic[4] + buildingTopic[1]
 buildBottomRight = buildBottomLeft + buildTopRight
 
 
-#print(buildTopLeft, buildTopRight, buildBottomLeft, buildBottomRight)
+# Here, we filter the building: windows that are inside of target building
 #0-object 1-x 2-y 3-width 4-height
 windowsInsideBuilding = list()
 for wind in arrayWindows:
@@ -166,48 +171,44 @@ for wind in arrayWindows:
 	windowBottomLeft = newArrayWindows[4] + newArrayWindows[1]
 	windowBottomRight = windowBottomLeft + newArrayWindows[3]
 
+	# here is where we actually filter the windows
 	if (buildTopLeft <= windowTopLeft) and (buildBottomLeft >= windowBottomLeft):
 		if (buildTopRight >= windowTopRight) and (buildBottomRight >= windowBottomRight):
 			windowsInsideBuilding.append(wind)
 
-print("\nWindows inside the building")
-print(len(windowsInsideBuilding))
-for values in windowsInsideBuilding:
-	print(values)
-print("\n")
-
-#2 we find a door and count windows from there up
-
-#we need to make sure that the door is inside the building of interest
+# We find a door in the target building in the photo and count windows from there up
+# We need to make sure that the door is inside the building of interest
 filterDoor = list()
 for door in arrayDoors:
 	doorLocation = door.split()
 
-	#convert each line to be in int array
+	# convert each line to be in int array
 	newArrayDoors = convertArrayStrToInt(doorLocation)
 
-	#here we extract all door coordinate 
+	# Here we extract all door coordinate 
 	doorTopLeft = newArrayDoors[1]
 	doorTopRight = newArrayDoors[3] + newArrayDoors[1]
 	doorBottomLeft = newArrayDoors[4] + newArrayDoors[1]
 	doorBottomRight = doorBottomLeft + newArrayDoors[3]
 
-	#we need to filter the right door, which must be inside the building
+	# We need to filter the right door, which must be inside the building
 	if (buildTopLeft <= doorTopLeft) and (buildBottomLeft >= doorBottomLeft):
 		if (buildTopRight >= doorTopRight) and (buildBottomRight >= doorBottomRight):
 			filterDoor.append(door)
 
+# Here we filter all the windows: windows that are inside within the door's left and right x coordinates
 windowsSameXCoordinate = list()
-
 if filterDoor != None:
 	doorFirst = filterDoor[0]
 	doorFirst = doorFirst.split()
 	doorLeftBound = int(doorFirst[1])
 	doorRightBound = doorLeftBound + int(doorFirst[3])
 
+	# Extending Left and Right bound of the door, since not all windows that belong in the same x coordinate
+	# will fall inside the original Left and Right bound of the door
 	doorLeftBound = doorLeftBound - 50
 	doorRightBound = doorRightBound + 50
-	#print("doorLeftBound" + str(doorLeftBound) + " doorRightBound" + str(doorRightBound))
+	
 	for wind in windowsInsideBuilding:
 		windowLocation = wind.split()
 		newArrayWindows = convertArrayStrToInt(windowLocation)
